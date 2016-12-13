@@ -37,7 +37,7 @@ func (b *Bot) Move(game *chess.Game) (*chess.Move, float64) {
 			newPos := pos.Update(m)
 			score := alphaBetaMin(scr, newPos, -10000.0, 10000.0, 5)
 			ch <- moveScore{m, score}
-		}(&scorer{cache: map[string]float64{}, maxColor: turn}, m)
+		}(&scorer{cache: map[[16]byte]float64{}, maxColor: turn}, m)
 	}
 	bestScore := -10000.0
 	for i := 0; i < len(moves); i++ {
@@ -51,53 +51,65 @@ func (b *Bot) Move(game *chess.Game) (*chess.Move, float64) {
 }
 
 func alphaBetaMax(scr *scorer, pos *chess.Position, alpha, beta float64, depthleft int) float64 {
+	hash := pos.Hash()
+	score, ok := scr.cache[hash]
+	if ok {
+		return score
+	}
 	if depthleft == 0 {
-		return scr.score(pos)
+		score = scr.score(pos)
+		scr.cache[hash] = score
+		return score
 	}
 	moves := pos.ValidMoves()
 	sort.Sort(byMoveImportance(moves))
 	for _, m := range moves {
 		newPos := pos.Update(m)
-		score := alphaBetaMin(scr, newPos, alpha, beta, depthleft-1)
+		score = alphaBetaMin(scr, newPos, alpha, beta, depthleft-1)
 		if score >= beta {
+			scr.cache[hash] = beta
 			return beta
 		}
 		if score > alpha {
 			alpha = score
 		}
 	}
+	scr.cache[hash] = alpha
 	return alpha
 }
 
 func alphaBetaMin(scr *scorer, pos *chess.Position, alpha, beta float64, depthleft int) float64 {
+	hash := pos.Hash()
+	score, ok := scr.cache[hash]
+	if ok {
+		return score
+	}
 	if depthleft == 0 {
-		return scr.score(pos)
+		score = scr.score(pos)
+		scr.cache[hash] = score
+		return score
 	}
 	for _, m := range pos.ValidMoves() {
 		newPos := pos.Update(m)
-		score := alphaBetaMax(scr, newPos, alpha, beta, depthleft-1)
+		score = alphaBetaMax(scr, newPos, alpha, beta, depthleft-1)
 		if score <= alpha {
+			scr.cache[hash] = alpha
 			return alpha
 		}
 		if score < beta {
 			beta = score
 		}
 	}
+	scr.cache[hash] = beta
 	return beta
 }
 
 type scorer struct {
-	cache    map[string]float64
+	cache    map[[16]byte]float64
 	maxColor chess.Color
 }
 
 func (s scorer) score(pos *chess.Position) float64 {
-	// check cache for precalculated value
-	// hash := pos.Hash()
-	// cacheScore, ok := s.cache[hash]
-	// if ok {
-	// 	return cacheScore
-	// }
 	// check for stalemate and checkmate
 	turn := pos.Turn()
 	status := pos.Status()
@@ -120,9 +132,6 @@ func (s scorer) score(pos *chess.Position) float64 {
 			total -= score
 		}
 	}
-	// write to cache
-	// s.cache[hash] = total
-
 	// moveCount := len(pos.ValidMoves())
 	// oppenentMoveCount := len(pos.Update(&chess.Move{}).ValidMoves())
 	// total += float64(moveCount-oppenentMoveCount) * 0.1
@@ -153,12 +162,11 @@ func openingMove(game *chess.Game) *chess.Move {
 	opennings := opening.Possible(game.Moves())
 	sort.Sort(byOpeningLength(opennings))
 	for _, op := range opennings {
-		opGame := op.Game()
-		opMoves := opGame.Moves()
-		opMoveIndex := len(opGame.Moves())
-		if opMoveIndex > moveIndex {
-			return opMoves[moveIndex]
+		moves := op.Game().Moves()
+		if len(moves) > moveIndex {
+			return moves[moveIndex]
 		}
+		break
 	}
 	return nil
 }

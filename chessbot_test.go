@@ -22,10 +22,11 @@ func TestTactics(t *testing.T) {
 		postFEN string
 	}
 	tacticTests := []tacticTest{
-		// {`r6Q/1b2k3/3p4/2q5/1p2PP2/2n5/PKPN4/7R w - - 0 1`, "r7/1b2k1Q1/3p4/2q5/1p2PP2/2n5/PKPN4/7R b - - 1 1"},
-		// {`8/1p2r3/1R4pk/p1p5/PnP5/1P2NK1p/8/8 w - - 0 44`, "8/1p2r3/1R4pk/p1p2N2/PnP5/1P3K1p/8/8 b - - 1 44"},
-		// {`8/6bp/6p1/3b3k/5Qp1/5P1P/5q2/2R4K w - - 0 38`, "8/6bp/6p1/3b3k/5QP1/5P2/5q2/2R4K b - - 0 38"},
-		{`2k1N3/pppr4/1b6/5P2/6n1/2P3q1/PP4B1/1K3Q1R b - - 2 30`, ""},
+		{`r6Q/1b2k3/3p4/2q5/1p2PP2/2n5/PKPN4/7R w - - 0 1`, "r7/1b2k1Q1/3p4/2q5/1p2PP2/2n5/PKPN4/7R b - - 1 1"},
+		{`8/1p2r3/1R4pk/p1p5/PnP5/1P2NK1p/8/8 w - - 0 44`, "8/1p2r3/1R4pk/p1p2N2/PnP5/1P3K1p/8/8 b - - 1 44"},
+		{`8/6bp/6p1/3b3k/5Qp1/5P1P/5q2/2R4K w - - 0 38`, "8/6bp/6p1/3b3k/5QP1/5P2/5q2/2R4K b - - 0 38"},
+		// {`2k1N3/pppr4/1b6/5P2/6n1/2P3q1/PP4B1/1K3Q1R b - - 2 30`, ""},
+		// {`r1b2b1r/pppk3p/2np2p1/3N4/4Rp2/1B1P4/PPP2PPP/4R1K1 b - - 3 17`, ""},
 	}
 	for _, tactic := range tacticTests {
 		bot := &chessbot.Bot{}
